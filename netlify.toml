@@ -1,0 +1,42 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Enable Next.js on Netlify
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  node_bundler = "esbuild"
+
+# API Routes configuration
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Environment variables that need to be set in Netlify UI:
+# NEXTAUTH_URL - Your Netlify site URL
+# NEXTAUTH_SECRET - Random string for session encryption
+# GITHUB_CLIENT_ID - Your GitHub OAuth App ID
+# GITHUB_CLIENT_SECRET - Your GitHub OAuth App Secret
+# GEMINI_API_KEY - Your Google Gemini API key
+# DATABASE_URL - Your database connection string
