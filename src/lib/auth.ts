@@ -3,19 +3,27 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import GitHubProvider from "next-auth/providers/github"
 import { prisma } from "@/lib/prisma"
 
+// Ensure environment variables are available
+const githubClientId = process.env.GITHUB_CLIENT_ID
+const githubClientSecret = process.env.GITHUB_CLIENT_SECRET
+
+if (!githubClientId || !githubClientSecret) {
+  console.warn('GitHub OAuth credentials not found. Authentication will be disabled.')
+}
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as NextAuthOptions['adapter'],
-  providers: [
+  adapter: githubClientId && githubClientSecret ? PrismaAdapter(prisma) as NextAuthOptions['adapter'] : undefined,
+  providers: githubClientId && githubClientSecret ? [
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      clientId: githubClientId,
+      clientSecret: githubClientSecret,
       authorization: {
         params: {
           scope: "read:user user:email repo public_repo",
         },
       },
     }),
-  ],
+  ] : [],
   callbacks: {
     session: ({ session, token }) => ({
       ...session,
@@ -38,4 +46,5 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  secret: process.env.NEXTAUTH_SECRET,
 }

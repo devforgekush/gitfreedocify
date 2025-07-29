@@ -1,9 +1,10 @@
 [build]
-  command = "npm run build"
+  command = "npm run build:netlify"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"
+  NPM_FLAGS = "--prefix=/dev/null"
 
 # Enable Next.js on Netlify
 [[plugins]]
