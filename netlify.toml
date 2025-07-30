@@ -1,11 +1,10 @@
 [build]
-  command = "npm run build:netlify"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
   PRISMA_CLI_BINARY_TARGETS = "native,debian-openssl-3.0.x,linux-musl,linux-musl-openssl-3.0.x"
-  PRISMA_SKIP_POSTINSTALL_GENERATE = "true"
 
 # Enable Next.js on Netlify
 [[plugins]]
@@ -14,6 +13,29 @@
 [functions]
   node_bundler = "esbuild"
   included_files = ["node_modules/.prisma/client/libquery_engine-*"]
+
+# Fallback redirects for failed builds
+[[redirects]]
+  from = "/"
+  to = "/fallback.html"
+  status = 200
+  conditions = {Role = ["app-failure"]}
+
+# Default SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["app"]}
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
 
 # Headers for security
 [[headers]]

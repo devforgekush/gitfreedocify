@@ -1,0 +1,9 @@
+# Netlify redirects file
+# SPA fallback for client-side routing
+/*    /index.html   200
+
+# API routes
+/api/*  /.netlify/functions/*  200
+
+# Fallback for any issues
+/fallback  /fallback.html  200
