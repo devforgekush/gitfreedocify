@@ -72,17 +72,30 @@ export async function POST(request: NextRequest) {
     const [, owner, repoName] = urlMatch
     console.log('Parsed repository:', owner, repoName)
 
-    // Get GitHub access token from user's account
-    const account = await prisma.account.findFirst({
-      where: {
-        userId: user.id,
-        provider: 'github',
-      },
-    })
+    // Get GitHub access token - try database first, then JWT token
+    let accessToken = (session as any)?.accessToken
+    
+    if (process.env.DATABASE_URL && process.env.DATABASE_URL !== '') {
+      try {
+        // Get GitHub access token from user's account
+        const account = await prisma.account.findFirst({
+          where: {
+            userId: user.id,
+            provider: 'github',
+          },
+        })
 
-    if (!account?.access_token) {
+        if (account?.access_token) {
+          accessToken = account.access_token
+        }
+      } catch (dbError) {
+        console.warn('Database error when fetching account, using JWT token:', dbError)
+      }
+    }
+
+    if (!accessToken) {
       return NextResponse.json(
-        { error: 'GitHub access token not found. Please reconnect your GitHub account.' },
+        { error: 'GitHub access token not found. Please sign in again.' },
         { status: 400 }
       )
     }
@@ -92,7 +105,7 @@ export async function POST(request: NextRequest) {
     try {
       const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repoName}`, {
         headers: {
-          'Authorization': `Bearer ${account.access_token}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Accept': 'application/vnd.github.v3+json',
           'User-Agent': 'GitFreeDocify'
         }
@@ -147,7 +160,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Analyze repository
-    const analyzer = new GitHubAnalyzer(account.access_token)
+    const analyzer = new GitHubAnalyzer(accessToken)
     const analysis = await analyzer.analyzeRepository(owner, repoName)
 
     // Generate documentation using the analyzer

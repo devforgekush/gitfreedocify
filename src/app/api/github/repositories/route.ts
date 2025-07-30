@@ -16,29 +16,34 @@ export async function GET() {
 
     console.log('✅ Session found, fetching repositories for:', session.user.email)
 
-    // Check if database is available and find user
-    let user: any
-    try {
-      // Find the user and their GitHub account
-      user = await prisma.user.findUnique({
-        where: { email: session.user.email },
-        include: {
-          accounts: {
-            where: { provider: 'github' }
+    // For JWT-only mode (when database is not available), use token for GitHub access
+    let accessToken = (session as any)?.accessToken
+
+    // If we have database available, try to get token from there
+    if (process.env.DATABASE_URL && process.env.DATABASE_URL !== '') {
+      try {
+        // Find the user and their GitHub account
+        const user = await prisma.user.findUnique({
+          where: { email: session.user.email },
+          include: {
+            accounts: {
+              where: { provider: 'github' }
+            }
           }
+        })
+
+        if (user?.accounts[0]?.access_token) {
+          accessToken = user.accounts[0].access_token
         }
-      })
-    } catch (dbError) {
-      console.error('❌ Database error:', dbError)
-      return NextResponse.json({ error: 'Database connection failed' }, { status: 503 })
+      } catch (dbError) {
+        console.warn('❌ Database error, falling back to JWT token:', dbError)
+      }
     }
 
-    if (!user || !user.accounts[0]?.access_token) {
-      console.log('❌ No GitHub account or access token found')
-      return NextResponse.json({ error: 'No GitHub access token found' }, { status: 401 })
+    if (!accessToken) {
+      console.log('❌ No GitHub access token found')
+      return NextResponse.json({ error: 'No GitHub access token found. Please sign in again.' }, { status: 401 })
     }
-
-    const accessToken = user.accounts[0].access_token
 
     // Initialize Octokit with the user's GitHub token
     const octokit = new Octokit({

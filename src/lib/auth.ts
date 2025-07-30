@@ -7,6 +7,11 @@ import { prisma } from "@/lib/prisma"
 const githubClientId = process.env.GITHUB_CLIENT_ID
 const githubClientSecret = process.env.GITHUB_CLIENT_SECRET
 const nextAuthSecret = process.env.NEXTAUTH_SECRET
+const nextAuthUrl = process.env.NEXTAUTH_URL || (
+  process.env.NODE_ENV === 'production' 
+    ? 'https://gitfreedocify.netlify.app' 
+    : 'http://localhost:3000'
+)
 const hasDatabaseUrl = process.env.DATABASE_URL && process.env.DATABASE_URL !== ''
 
 if (!githubClientId || !githubClientSecret) {
@@ -20,6 +25,8 @@ if (!nextAuthSecret) {
 if (!hasDatabaseUrl) {
   console.warn('DATABASE_URL not found. Using JWT strategy without database adapter.')
 }
+
+console.log('NextAuth URL:', nextAuthUrl)
 
 export const authOptions: NextAuthOptions = {
   adapter: githubClientId && githubClientSecret && hasDatabaseUrl ? PrismaAdapter(prisma) as NextAuthOptions['adapter'] : undefined,
@@ -51,6 +58,12 @@ export const authOptions: NextAuthOptions = {
       }
       return token
     },
+    redirect: ({ url, baseUrl }) => {
+      // Handle redirect after authentication
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
+    },
   },
   pages: {
     signIn: "/auth/signin",
@@ -60,4 +73,5 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   secret: nextAuthSecret,
+  debug: process.env.NODE_ENV === 'development',
 }
