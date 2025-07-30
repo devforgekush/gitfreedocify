@@ -1,11 +1,10 @@
 'use client'
 
-import { SessionProvider } from 'next-auth/react'
-
+// Temporary simplified providers without NextAuth
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <>
       {children}
-    </SessionProvider>
+    </>
   )
 }
