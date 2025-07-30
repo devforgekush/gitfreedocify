@@ -10,12 +10,6 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-[functions]
-  node_bundler = "esbuild"
-
-# API routes should be handled by Next.js functions
-# No custom redirects needed - Next.js plugin handles this
-
 # Headers for security
 [[headers]]
   for = "/*"
@@ -23,4 +17,5 @@
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
     Referrer-Policy = "strict-origin-when-cross-origin"
