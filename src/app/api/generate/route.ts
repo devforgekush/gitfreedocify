@@ -190,6 +190,13 @@ export async function POST(request: NextRequest) {
 
     // Generate documentation using the analyzer
     const readme = await analyzer.generateREADME(analysis)
+    
+    // Validate generated content
+    if (!readme || typeof readme !== 'string' || readme.trim().length === 0) {
+      throw new Error('AI failed to generate valid documentation content')
+    }
+
+    console.log('📝 Documentation generated successfully, length:', readme.length)
 
     // Save project to database (if available)
     let project = null
@@ -219,15 +226,17 @@ export async function POST(request: NextRequest) {
             userId: user.id,
           },
         })
+        console.log('💾 Project saved to database successfully')
       } catch (dbError) {
         console.warn('Failed to save project to database:', dbError)
         // Continue without saving to database
       }
     }
 
-    return NextResponse.json({
-      readme,
-      project,
+    // Ensure we return a valid JSON response
+    const responseData = {
+      readme: readme,
+      project: project,
       analysis: {
         name: analysis.name,
         description: analysis.description,
@@ -236,7 +245,9 @@ export async function POST(request: NextRequest) {
         hasTests: analysis.hasTests,
         hasDocumentation: analysis.hasDocumentation,
       },
-    })
+    }
+
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error('Error generating documentation:', error)
     
@@ -247,16 +258,28 @@ export async function POST(request: NextRequest) {
           { status: 429 }
         )
       }
-      if (error.message.includes('Not Found')) {
+      if (error.message.includes('Not Found') || error.message.includes('404')) {
         return NextResponse.json(
-          { error: 'Repository not found or not accessible. Make sure the repository is public.' },
+          { error: 'Repository not found or not accessible. Make sure the repository is public and the URL is correct.' },
           { status: 404 }
+        )
+      }
+      if (error.message.includes('timeout')) {
+        return NextResponse.json(
+          { error: 'AI generation timed out. Please try again with a smaller repository or try again later.' },
+          { status: 408 }
+        )
+      }
+      if (error.message.includes('AI failed')) {
+        return NextResponse.json(
+          { error: 'AI service failed to generate documentation. Please try again.' },
+          { status: 503 }
         )
       }
     }
 
     return NextResponse.json(
-      { error: 'Failed to generate documentation. Please try again.' },
+      { error: 'Failed to generate documentation. Please try again later.' },
       { status: 500 }
     )
   }

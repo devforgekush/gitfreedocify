@@ -49,9 +49,20 @@ class GeminiProvider implements AIProvider {
     const prompt = this.createPrompt(analysis)
     const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
     
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    return response.text()
+    try {
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+      
+      if (!text || text.trim().length === 0) {
+        throw new Error('Gemini returned empty response')
+      }
+      
+      return text
+    } catch (error) {
+      console.error('Gemini API error:', error)
+      throw new Error(`Gemini AI failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   private createPrompt(analysis: RepoAnalysis): string {
@@ -169,18 +180,28 @@ class MistralProvider implements AIProvider {
   async generateREADME(analysis: RepoAnalysis): Promise<string> {
     const prompt = this.createPrompt(analysis)
     
-    const response = await this.client.chat.complete({
-      model: 'mistral-large-latest',
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
-    })
+    try {
+      const response = await this.client.chat.complete({
+        model: 'mistral-large-latest',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      })
 
-    const content = response.choices[0].message.content
-    return typeof content === 'string' ? content : 'Failed to generate documentation'
+      const content = response.choices[0]?.message?.content
+      
+      if (!content || (typeof content === 'string' && content.trim().length === 0)) {
+        throw new Error('Mistral returned empty response')
+      }
+      
+      return typeof content === 'string' ? content : 'Failed to generate documentation'
+    } catch (error) {
+      console.error('Mistral API error:', error)
+      throw new Error(`Mistral AI failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   private createPrompt(analysis: RepoAnalysis): string {
@@ -326,12 +347,27 @@ export class GitHubAnalyzer {
     for (const provider of this.aiProviders) {
       try {
         console.log(`🤖 Trying ${provider.name} AI for README generation...`)
-        const result = await provider.generateREADME(analysis)
-        console.log(`✅ ${provider.name} AI successful!`)
+        
+        // Add timeout wrapper
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('AI generation timeout (30s)')), 30000)
+        })
+        
+        const generationPromise = provider.generateREADME(analysis)
+        
+        const result = await Promise.race([generationPromise, timeoutPromise])
+        
+        // Validate result
+        if (!result || typeof result !== 'string' || result.trim().length === 0) {
+          throw new Error('AI provider returned empty or invalid content')
+        }
+        
+        console.log(`✅ ${provider.name} AI successful! Generated ${result.length} characters`)
         return result
       } catch (error) {
-        console.error(`❌ ${provider.name} AI failed:`, error instanceof Error ? error.message : error)
-        lastError = error instanceof Error ? error : new Error(String(error))
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        console.error(`❌ ${provider.name} AI failed:`, errorMessage)
+        lastError = error instanceof Error ? error : new Error(errorMessage)
         continue
       }
     }
