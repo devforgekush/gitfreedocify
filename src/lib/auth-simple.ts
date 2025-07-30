@@ -12,7 +12,7 @@ if (!process.env.NEXTAUTH_SECRET) {
   throw new Error('Missing NEXTAUTH_SECRET')
 }
 
-// Simple auth configuration without complex database adapter
+// Simple auth configuration without database adapter (JWT only)
 export const authOptions: NextAuthOptions = {
   providers: [
     GitHubProvider({
@@ -27,19 +27,22 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    jwt: ({ token, account, user }) => {
+    jwt: async ({ token, account, user }) => {
       if (account && user) {
         token.accessToken = account.access_token
         token.id = user.id
+        token.login = (user as any).login || user.email?.split('@')[0]
       }
       return token
     },
-    session: ({ session, token }) => {
+    session: async ({ session, token }) => {
       if (token && session.user) {
         session.user.id = token.sub!
         session.accessToken = token.accessToken as string
+        session.user.login = token.login as string
       }
       return session
     },
@@ -49,5 +52,5 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  debug: false, // Disable debug in production
 }
