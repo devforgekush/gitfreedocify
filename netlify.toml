@@ -13,23 +13,8 @@
 [functions]
   node_bundler = "esbuild"
 
-# Simple redirect for root
-[[redirects]]
-  from = "/"
-  to = "/index.html"
-  status = 200
-
-# API routes
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-# Catch all for Next.js
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# API routes should be handled by Next.js functions
+# No custom redirects needed - Next.js plugin handles this
 
 # Headers for security
 [[headers]]
