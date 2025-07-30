@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 export default function DebugPage() {
-  const [envInfo, setEnvInfo] = useState<any>(null)
+  const [envInfo, setEnvInfo] = useState<Record<string, unknown> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
