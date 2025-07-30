@@ -48,12 +48,13 @@ export const authOptions: NextAuthOptions = {
         ...session.user,
         id: token.sub!,
       },
+      accessToken: token.accessToken,
     }),
     jwt: ({ token, user, account }) => {
       if (user) {
         token.sub = user.id
       }
-      if (account) {
+      if (account?.access_token) {
         token.accessToken = account.access_token
       }
       return token

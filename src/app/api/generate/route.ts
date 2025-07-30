@@ -17,35 +17,37 @@ export async function POST(request: NextRequest) {
     console.log('User email:', session.user.email)
 
     // Check if database is available and find/create user
-    let user: any
-    try {
-      // Find or create the user in the database
-      user = await prisma.user.findUnique({
-        where: { email: session.user.email },
-      })
-
-      if (!user) {
-        console.log('User not found in database, creating new user...')
-        
-        // Create the user if they don't exist
-        user = await prisma.user.create({
-          data: {
-            email: session.user.email,
-            name: session.user.name || 'GitHub User',
-            image: session.user.image || null,
-          },
+    let user: any = null
+    if (process.env.DATABASE_URL && process.env.DATABASE_URL !== '') {
+      try {
+        // Find or create the user in the database
+        user = await prisma.user.findUnique({
+          where: { email: session.user.email },
         })
-        
-        console.log('New user created:', user.id)
-      } else {
-        console.log('User found:', user.id)
+
+        if (!user) {
+          console.log('User not found in database, creating new user...')
+          
+          // Create the user if they don't exist
+          user = await prisma.user.create({
+            data: {
+              email: session.user.email,
+              name: session.user.name || 'GitHub User',
+              image: session.user.image || null,
+            },
+          })
+          
+          console.log('New user created:', user.id)
+        } else {
+          console.log('User found:', user.id)
+        }
+      } catch (dbError) {
+        console.error('Database error:', dbError)
+        console.warn('Continuing without database...')
+        user = null
       }
-    } catch (dbError) {
-      console.error('Database error:', dbError)
-      return NextResponse.json(
-        { error: 'Database connection failed. Please try again later.' },
-        { status: 503 }
-      )
+    } else {
+      console.log('Database not available, continuing in JWT-only mode')
     }
 
     const body = await request.json()
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
     // Get GitHub access token - try database first, then JWT token
     let accessToken = (session as any)?.accessToken
     
-    if (process.env.DATABASE_URL && process.env.DATABASE_URL !== '') {
+    if (process.env.DATABASE_URL && process.env.DATABASE_URL !== '' && user) {
       try {
         // Get GitHub access token from user's account
         const account = await prisma.account.findFirst({
@@ -87,6 +89,7 @@ export async function POST(request: NextRequest) {
 
         if (account?.access_token) {
           accessToken = account.access_token
+          console.log('✅ Using database access token')
         }
       } catch (dbError) {
         console.warn('Database error when fetching account, using JWT token:', dbError)
@@ -94,10 +97,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (!accessToken) {
+      console.error('❌ No access token available in session or database')
       return NextResponse.json(
-        { error: 'GitHub access token not found. Please sign in again.' },
-        { status: 400 }
+        { error: 'GitHub access token not found. Please sign out and sign in again.' },
+        { status: 401 }
       )
+    } else {
+      console.log('✅ Access token found, proceeding with repository analysis')
     }
 
     // Verify user has access to the repository
@@ -166,31 +172,39 @@ export async function POST(request: NextRequest) {
     // Generate documentation using the analyzer
     const readme = await analyzer.generateREADME(analysis)
 
-    // Save project to database
-    const project = await prisma.project.upsert({
-      where: {
-        userId_githubId: {
-          userId: user.id,
-          githubId: `${owner}/${repoName}`,
-        },
-      },
-      update: {
-        name: analysis.name,
-        description: analysis.description,
-        language: analysis.language,
-        readmeContent: readme,
-        updatedAt: new Date(),
-      },
-      create: {
-        name: analysis.name,
-        description: analysis.description,
-        githubUrl,
-        githubId: `${owner}/${repoName}`,
-        language: analysis.language,
-        readmeContent: readme,
-        userId: user.id,
-      },
-    })
+    // Save project to database (if available)
+    let project = null
+    if (process.env.DATABASE_URL && process.env.DATABASE_URL !== '' && user) {
+      try {
+        project = await prisma.project.upsert({
+          where: {
+            userId_githubId: {
+              userId: user.id,
+              githubId: `${owner}/${repoName}`,
+            },
+          },
+          update: {
+            name: analysis.name,
+            description: analysis.description,
+            language: analysis.language,
+            readmeContent: readme,
+            updatedAt: new Date(),
+          },
+          create: {
+            name: analysis.name,
+            description: analysis.description,
+            githubUrl,
+            githubId: `${owner}/${repoName}`,
+            language: analysis.language,
+            readmeContent: readme,
+            userId: user.id,
+          },
+        })
+      } catch (dbError) {
+        console.warn('Failed to save project to database:', dbError)
+        // Continue without saving to database
+      }
+    }
 
     return NextResponse.json({
       readme,

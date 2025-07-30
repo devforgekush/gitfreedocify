@@ -11,6 +11,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Check if database is available
+    if (!process.env.DATABASE_URL || process.env.DATABASE_URL === '') {
+      console.log('Database not available, returning empty projects list')
+      return NextResponse.json([])
+    }
+
     // Check if database is available and find/create user
     let user: any
     try {
@@ -31,10 +37,7 @@ export async function GET() {
       }
     } catch (dbError) {
       console.error('Database error:', dbError)
-      return NextResponse.json(
-        { error: 'Database connection failed. Please try again later.' },
-        { status: 503 }
-      )
+      return NextResponse.json([])
     }
 
     const projects = await prisma.project.findMany({
@@ -62,6 +65,12 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if database is available
+    if (!process.env.DATABASE_URL || process.env.DATABASE_URL === '') {
+      console.log('Database not available, cannot save project')
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
     }
 
     // Check if database is available and find/create user

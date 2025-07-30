@@ -34,6 +34,7 @@ export async function GET() {
 
         if (user?.accounts[0]?.access_token) {
           accessToken = user.accounts[0].access_token
+          console.log('✅ Using database access token')
         }
       } catch (dbError) {
         console.warn('❌ Database error, falling back to JWT token:', dbError)
@@ -42,7 +43,9 @@ export async function GET() {
 
     if (!accessToken) {
       console.log('❌ No GitHub access token found')
-      return NextResponse.json({ error: 'No GitHub access token found. Please sign in again.' }, { status: 401 })
+      return NextResponse.json({ error: 'No GitHub access token found. Please sign out and sign in again.' }, { status: 401 })
+    } else {
+      console.log('✅ Access token found, fetching repositories')
     }
 
     // Initialize Octokit with the user's GitHub token
