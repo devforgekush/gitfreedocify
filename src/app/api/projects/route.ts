@@ -3,6 +3,16 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+interface User {
+  id: string
+  email: string | null
+  name?: string | null
+  image?: string | null
+  emailVerified?: Date | null
+  createdAt?: Date
+  updatedAt?: Date
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -18,7 +28,7 @@ export async function GET() {
     }
 
     // Check if database is available and find/create user
-    let user: any
+    let user: User | null = null
     try {
       // Find or create the user in the database
       user = await prisma.user.findUnique({
@@ -74,7 +84,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if database is available and find/create user
-    let user: any
+    let user: User | null = null
     try {
       // Find or create the user in the database
       user = await prisma.user.findUnique({

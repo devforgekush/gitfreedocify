@@ -181,7 +181,7 @@ export class GitHubAnalyzer {
         dependencies.push(...Object.keys(pkg.dependencies || {}))
         dependencies.push(...Object.keys(pkg.devDependencies || {}))
       }
-    } catch (error) {
+    } catch {
       // Try requirements.txt for Python
       try {
         const { data: requirements } = await this.octokit.repos.getContent({
@@ -195,7 +195,7 @@ export class GitHubAnalyzer {
           const deps = content.split('\n').filter(line => line.trim() && !line.startsWith('#'))
           dependencies.push(...deps)
         }
-      } catch (error) {
+      } catch {
         // No dependencies file found
       }
     }
@@ -476,7 +476,7 @@ Generate the most beautiful, comprehensive, and engaging README possible. Make i
     throw new Error('Failed to generate README after all retry attempts')
   }
 
-  async generateProjectLogo(projectName: string, _description: string): Promise<string> {
+  async generateProjectLogo(projectName: string): Promise<string> {
     // This would integrate with DALL-E for logo generation
     // For now, we'll return a placeholder
     return `https://via.placeholder.com/200x200/4F46E5/FFFFFF?text=${projectName.charAt(0).toUpperCase()}`

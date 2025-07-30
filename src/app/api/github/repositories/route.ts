@@ -4,10 +4,19 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Octokit } from '@octokit/rest'
 
+interface SessionWithToken {
+  user?: {
+    email?: string | null
+    name?: string | null
+    image?: string | null
+  }
+  accessToken?: string
+}
+
 export async function GET() {
   try {
     console.log('🔍 GitHub repositories API called')
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions) as SessionWithToken | null
     
     if (!session?.user?.email) {
       console.log('❌ No session or email found')
@@ -17,7 +26,7 @@ export async function GET() {
     console.log('✅ Session found, fetching repositories for:', session.user.email)
 
     // For JWT-only mode (when database is not available), use token for GitHub access
-    let accessToken = (session as any)?.accessToken
+    let accessToken = session?.accessToken
 
     // If we have database available, try to get token from there
     if (process.env.DATABASE_URL && process.env.DATABASE_URL !== '') {

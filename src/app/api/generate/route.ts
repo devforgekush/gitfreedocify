@@ -4,10 +4,29 @@ import { authOptions } from '@/lib/auth'
 import { GitHubAnalyzer } from '@/lib/ai-service'
 import { prisma } from '@/lib/prisma'
 
+interface User {
+  id: string
+  email: string | null
+  name?: string | null
+  image?: string | null
+  emailVerified?: Date | null
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+interface SessionWithToken {
+  user?: {
+    email?: string | null
+    name?: string | null
+    image?: string | null
+  }
+  accessToken?: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log('Generate API called')
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions) as SessionWithToken | null
     
     if (!session?.user?.email) {
       console.log('No session or email found')
@@ -17,7 +36,7 @@ export async function POST(request: NextRequest) {
     console.log('User email:', session.user.email)
 
     // Check if database is available and find/create user
-    let user: any = null
+    let user: User | null = null
     if (process.env.DATABASE_URL && process.env.DATABASE_URL !== '') {
       try {
         // Find or create the user in the database
@@ -37,7 +56,7 @@ export async function POST(request: NextRequest) {
             },
           })
           
-          console.log('New user created:', user.id)
+          console.log('New user created:', user?.id)
         } else {
           console.log('User found:', user.id)
         }
@@ -75,7 +94,7 @@ export async function POST(request: NextRequest) {
     console.log('Parsed repository:', owner, repoName)
 
     // Get GitHub access token - try database first, then JWT token
-    let accessToken = (session as any)?.accessToken
+    let accessToken = session?.accessToken
     
     if (process.env.DATABASE_URL && process.env.DATABASE_URL !== '' && user) {
       try {

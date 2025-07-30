@@ -499,7 +499,7 @@ export class GitHubAnalyzer {
     )
   }
 
-  async generateProjectLogo(projectName: string, _description: string): Promise<string> {
+  async generateProjectLogo(projectName: string): Promise<string> {
     // This would integrate with DALL-E for logo generation
     // For now, we'll return a placeholder
     return `https://via.placeholder.com/200x200/4F46E5/FFFFFF?text=${projectName.charAt(0).toUpperCase()}`

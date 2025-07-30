@@ -53,7 +53,7 @@ export const prisma = new Proxy({} as PrismaClient, {
         return () => Promise.resolve(null)
       }
     }
-    return (prismaClient as any)[prop]
+    return (prismaClient as PrismaClient)[prop as keyof PrismaClient]
   }
 })
 
