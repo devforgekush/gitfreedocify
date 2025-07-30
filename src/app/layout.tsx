@@ -19,7 +19,11 @@ export const metadata: Metadata = {
   description: "Generate professional documentation for your GitHub repositories using AI. Create comprehensive README files and project documentation in seconds.",
   keywords: "GitHub, documentation, AI, README generator, open source",
   authors: [{ name: "Kushagra Jain" }],
-  viewport: "width=device-width, initial-scale=1",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
