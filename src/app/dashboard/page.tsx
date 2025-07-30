@@ -120,45 +120,45 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 pb-safe">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-lg shadow-xl border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="flex items-center space-x-2 group">
-                <div className="h-10 w-10 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <FileText className="h-5 w-5 text-white" />
+      <header className="bg-white/90 backdrop-blur-lg shadow-xl border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Link href="/" className="flex items-center space-x-1 sm:space-x-2 group">
+                <div className="h-8 w-8 sm:h-10 sm:w-10 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">GitFreeDocify</span>
+                <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">GitFreeDocify</span>
               </Link>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="flex items-center space-x-1 sm:space-x-2">
                 {session.user?.image ? (
                   <Image
                     src={session.user.image}
                     alt={session.user.name || 'User'}
-                    width={32}
-                    height={32}
-                    className="h-8 w-8 rounded-full"
+                    width={28}
+                    height={28}
+                    className="h-7 w-7 sm:h-8 sm:w-8 rounded-full"
                   />
                 ) : (
-                  <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-medium">
+                  <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs sm:text-sm font-medium">
                     {session.user?.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:block">
                   {session.user?.name}
                 </span>
               </div>
               <button
                 onClick={() => signOut()}
-                className="flex items-center space-x-1 text-gray-500 hover:text-gray-700 transition-colors"
+                className="flex items-center space-x-1 text-gray-500 hover:text-gray-700 transition-colors p-1"
               >
                 <LogOut className="h-4 w-4" />
-                <span>Sign Out</span>
+                <span className="hidden sm:inline text-sm">Sign Out</span>
               </button>
             </div>
           </div>
@@ -166,17 +166,17 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Your GitHub Repositories</h1>
-            <p className="text-gray-600 mt-2 text-lg">
+            <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Your GitHub Repositories</h1>
+            <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-lg">
               All your GitHub repositories ({repositories.length} total)
             </p>
           </div>
           <Link
             href="/generate"
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
           >
             <Plus className="h-4 w-4" />
             <span>Generate Documentation</span>
@@ -184,45 +184,45 @@ export default function Dashboard() {
         </div>
 
         {/* Search Bar */}
-        <div className="relative mb-6">
+        <div className="relative mb-4 sm:mb-6">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <input
             type="text"
             placeholder="Search repositories..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
           />
         </div>
 
         {/* Repositories Grid */}
         {filteredRepos.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {filteredRepos.map((repo) => (
-              <div key={repo.id} className="group bg-white/80 backdrop-blur-lg rounded-2xl border border-white/50 p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 shadow-lg">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-10 w-10 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <Github className="h-5 w-5 text-white" />
+              <div key={repo.id} className="group bg-white/80 backdrop-blur-lg rounded-lg sm:rounded-2xl border border-white/50 p-4 sm:p-6 lg:p-8 hover:shadow-xl sm:hover:shadow-2xl transition-all duration-300 sm:transform sm:hover:scale-105 sm:hover:-translate-y-2 shadow-md sm:shadow-lg">
+                <div className="flex items-start justify-between mb-4 sm:mb-6">
+                  <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 bg-gradient-to-br from-gray-600 to-gray-800 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                      <Github className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">{repo.name}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">{repo.name}</h3>
                   </div>
                   <Link
                     href={repo.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-indigo-600 transition-colors transform hover:scale-110"
+                    className="text-gray-400 hover:text-indigo-600 transition-colors transform hover:scale-110 flex-shrink-0 ml-2"
                   >
-                    <ExternalLink className="h-5 w-5" />
+                    <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Link>
                 </div>
 
-                <p className="text-gray-600 text-sm mb-6 line-clamp-2 leading-relaxed">
+                <p className="text-gray-600 text-xs sm:text-sm mb-4 sm:mb-6 line-clamp-2 leading-relaxed">
                   {repo.description || 'No description available'}
                 </p>
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-500">
                     <div className="flex items-center space-x-1">
                       <Star className="h-3 w-3" />
                       <span>{repo.stargazers_count || 0}</span>
@@ -239,8 +239,8 @@ export default function Dashboard() {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div className="flex items-center space-x-2 flex-wrap gap-1">
                     {repo.language && (
                       <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
                         {repo.language}
@@ -254,7 +254,7 @@ export default function Dashboard() {
                   </div>
                   <Link
                     href={`/generate?repo=${encodeURIComponent(repo.githubUrl)}`}
-                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                    className={`px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-medium transition-colors flex-shrink-0 ${
                       repo.hasDocumentation
                         ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
                         : 'bg-indigo-600 text-white hover:bg-indigo-700'
