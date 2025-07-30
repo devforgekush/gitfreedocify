@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function Page() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
@@ -19,12 +21,12 @@ export default function Page() {
             <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">GitFreeDocify</span>
           </div>
           <div className="flex items-center space-x-4">
-            <a 
+            <Link 
               href="/auth/signin"
               className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               Sign In
-            </a>
+            </Link>
           </div>
         </div>
       </nav>
@@ -53,14 +55,14 @@ export default function Page() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <a 
+            <Link 
               href="/auth/signin"
               className="group bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-10 py-4 rounded-2xl font-bold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 hover:-translate-y-1 inline-flex items-center justify-center"
             >
               <span className="mr-2">🚀</span>
               Get Started Free
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl blur opacity-50 group-hover:opacity-75 transition-opacity -z-10"></div>
-            </a>
+            </Link>
             <a 
               href="#features"
               className="group border-2 border-gray-300 text-gray-700 px-10 py-4 rounded-2xl font-bold hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 inline-flex items-center justify-center"
