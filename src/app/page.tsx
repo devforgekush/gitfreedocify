@@ -1,18 +1,40 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function Page() {
+  const [isLoaded, setIsLoaded] = useState(false)
+
   useEffect(() => {
-    console.log('GitFreeDocify: Main page loaded successfully')
-    
-    // Debug info
-    if (typeof window !== 'undefined') {
-      console.log('Window location:', window.location.href)
-      console.log('User agent:', navigator.userAgent)
+    try {
+      console.log('GitFreeDocify: Main page loaded successfully')
+      
+      // Debug info
+      if (typeof window !== 'undefined') {
+        console.log('Window location:', window.location.href)
+        console.log('User agent:', navigator.userAgent)
+      }
+      
+      setIsLoaded(true)
+    } catch (error) {
+      console.error('Page load error:', error)
+      setIsLoaded(true) // Still show the page even if there's an error
     }
   }, [])
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg mx-auto mb-4">
+            <span className="text-white font-bold text-lg">G</span>
+          </div>
+          <p className="text-gray-600">Loading GitFreeDocify...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">

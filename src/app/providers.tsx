@@ -7,12 +7,18 @@ export default function Providers({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <SessionProvider
-      refetchInterval={0}
-      refetchOnWindowFocus={false}
-    >
-      {children}
-    </SessionProvider>
-  );
+  try {
+    return (
+      <SessionProvider
+        refetchInterval={0}
+        refetchOnWindowFocus={false}
+      >
+        {children}
+      </SessionProvider>
+    );
+  } catch (error) {
+    console.error('Provider error:', error);
+    // Return children without SessionProvider if there's an error
+    return <>{children}</>;
+  }
 }
