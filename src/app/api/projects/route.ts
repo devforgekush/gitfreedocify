@@ -11,20 +11,30 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Find or create the user in the database
-    let user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-
-    if (!user) {
-      // Create the user if they don't exist
-      user = await prisma.user.create({
-        data: {
-          email: session.user.email,
-          name: session.user.name || 'GitHub User',
-          image: session.user.image || null,
-        },
+    // Check if database is available and find/create user
+    let user: any
+    try {
+      // Find or create the user in the database
+      user = await prisma.user.findUnique({
+        where: { email: session.user.email },
       })
+
+      if (!user) {
+        // Create the user if they don't exist
+        user = await prisma.user.create({
+          data: {
+            email: session.user.email,
+            name: session.user.name || 'GitHub User',
+            image: session.user.image || null,
+          },
+        })
+      }
+    } catch (dbError) {
+      console.error('Database error:', dbError)
+      return NextResponse.json(
+        { error: 'Database connection failed. Please try again later.' },
+        { status: 503 }
+      )
     }
 
     const projects = await prisma.project.findMany({
@@ -54,20 +64,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Find or create the user in the database
-    let user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-
-    if (!user) {
-      // Create the user if they don't exist
-      user = await prisma.user.create({
-        data: {
-          email: session.user.email,
-          name: session.user.name || 'GitHub User',
-          image: session.user.image || null,
-        },
+    // Check if database is available and find/create user
+    let user: any
+    try {
+      // Find or create the user in the database
+      user = await prisma.user.findUnique({
+        where: { email: session.user.email },
       })
+
+      if (!user) {
+        // Create the user if they don't exist
+        user = await prisma.user.create({
+          data: {
+            email: session.user.email,
+            name: session.user.name || 'GitHub User',
+            image: session.user.image || null,
+          },
+        })
+      }
+    } catch (dbError) {
+      console.error('Database error:', dbError)
+      return NextResponse.json(
+        { error: 'Database connection failed. Please try again later.' },
+        { status: 503 }
+      )
     }
 
     const body = await request.json()

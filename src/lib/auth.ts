@@ -6,9 +6,14 @@ import { prisma } from "@/lib/prisma"
 // Ensure environment variables are available
 const githubClientId = process.env.GITHUB_CLIENT_ID
 const githubClientSecret = process.env.GITHUB_CLIENT_SECRET
+const nextAuthSecret = process.env.NEXTAUTH_SECRET
 
 if (!githubClientId || !githubClientSecret) {
   console.warn('GitHub OAuth credentials not found. Authentication will be disabled.')
+}
+
+if (!nextAuthSecret) {
+  console.warn('NEXTAUTH_SECRET not found. Please set this environment variable.')
 }
 
 export const authOptions: NextAuthOptions = {
@@ -46,5 +51,5 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: nextAuthSecret,
 }

@@ -19,7 +19,15 @@ try {
   prismaClient = null
 }
 
-export const prisma = prismaClient as PrismaClient
+// Create a safe prisma client that throws meaningful errors
+export const prisma = new Proxy({} as PrismaClient, {
+  get(target, prop) {
+    if (!prismaClient) {
+      throw new Error('Database connection not available. Please check your DATABASE_URL environment variable.')
+    }
+    return (prismaClient as any)[prop]
+  }
+})
 
 if (process.env.NODE_ENV !== 'production' && prismaClient) {
   globalForPrisma.prisma = prismaClient

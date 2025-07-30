@@ -16,26 +16,36 @@ export async function POST(request: NextRequest) {
 
     console.log('User email:', session.user.email)
 
-    // Find or create the user in the database
-    let user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-
-    if (!user) {
-      console.log('User not found in database, creating new user...')
-      
-      // Create the user if they don't exist
-      user = await prisma.user.create({
-        data: {
-          email: session.user.email,
-          name: session.user.name || 'GitHub User',
-          image: session.user.image || null,
-        },
+    // Check if database is available and find/create user
+    let user: any
+    try {
+      // Find or create the user in the database
+      user = await prisma.user.findUnique({
+        where: { email: session.user.email },
       })
-      
-      console.log('New user created:', user.id)
-    } else {
-      console.log('User found:', user.id)
+
+      if (!user) {
+        console.log('User not found in database, creating new user...')
+        
+        // Create the user if they don't exist
+        user = await prisma.user.create({
+          data: {
+            email: session.user.email,
+            name: session.user.name || 'GitHub User',
+            image: session.user.image || null,
+          },
+        })
+        
+        console.log('New user created:', user.id)
+      } else {
+        console.log('User found:', user.id)
+      }
+    } catch (dbError) {
+      console.error('Database error:', dbError)
+      return NextResponse.json(
+        { error: 'Database connection failed. Please try again later.' },
+        { status: 503 }
+      )
     }
 
     const body = await request.json()

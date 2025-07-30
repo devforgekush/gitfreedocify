@@ -16,15 +16,22 @@ export async function GET() {
 
     console.log('✅ Session found, fetching repositories for:', session.user.email)
 
-    // Find the user and their GitHub account
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: {
-        accounts: {
-          where: { provider: 'github' }
+    // Check if database is available and find user
+    let user: any
+    try {
+      // Find the user and their GitHub account
+      user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        include: {
+          accounts: {
+            where: { provider: 'github' }
+          }
         }
-      }
-    })
+      })
+    } catch (dbError) {
+      console.error('❌ Database error:', dbError)
+      return NextResponse.json({ error: 'Database connection failed' }, { status: 503 })
+    }
 
     if (!user || !user.accounts[0]?.access_token) {
       console.log('❌ No GitHub account or access token found')

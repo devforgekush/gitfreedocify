@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from './providers'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "GitFreeDocify - AI-Powered Documentation Generator",
   description: "Generate professional documentation for your GitHub repositories using AI. Create comprehensive README files and project documentation in seconds.",
+  keywords: "GitHub, documentation, AI, README generator, open source",
+  authors: [{ name: "Kushagra Jain" }],
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
@@ -28,9 +32,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          {children}
-        </Providers>
+        <ErrorBoundary>
+          <Providers>
+            {children}
+          </Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );
