@@ -3,7 +3,7 @@
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
   PRISMA_CLI_BINARY_TARGETS = "native,debian-openssl-3.0.x"
 
 # Enable Next.js on Netlify
