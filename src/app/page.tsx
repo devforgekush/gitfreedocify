@@ -174,7 +174,7 @@ export default function Page() {
 
               {/* Description */}
               <p className="text-gray-600 text-lg leading-relaxed mb-8 max-w-lg mx-auto">
-                Passionate full-stack developer creating innovative solutions to make developers' lives easier. 
+                Passionate full-stack developer creating innovative solutions to make developers&apos; lives easier. 
                 Building the future of AI-powered development tools.
               </p>
 

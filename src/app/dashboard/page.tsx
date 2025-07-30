@@ -323,7 +323,7 @@ export default function Dashboard() {
 
               {/* Description */}
               <p className="text-gray-600 text-base leading-relaxed mb-6 max-w-md mx-auto">
-                Passionate full-stack developer creating innovative solutions to make developers' lives easier. 
+                Passionate full-stack developer creating innovative solutions to make developers&apos; lives easier. 
                 Building the future of AI-powered development tools.
               </p>
 
