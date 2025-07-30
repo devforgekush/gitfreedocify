@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Remove experimental serverComponentsExternalPackages for Netlify
-  
   // Image optimization settings
   images: {
     unoptimized: true, // Required for Netlify deployment

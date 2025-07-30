@@ -15,18 +15,6 @@
   node_bundler = "esbuild"
   included_files = ["node_modules/.prisma/client/libquery_engine-*"]
 
-# API Routes configuration
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-# SPA fallback for client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
 # Headers for security
 [[headers]]
   for = "/*"
