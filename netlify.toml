@@ -4,7 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  PRISMA_CLI_BINARY_TARGETS = "native,debian-openssl-3.0.x,linux-musl,linux-musl-openssl-3.0.x"
+  SKIP_PRISMA_GENERATE = "true"
 
 # Enable Next.js on Netlify
 [[plugins]]
@@ -12,7 +12,6 @@
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["node_modules/.prisma/client/libquery_engine-*"]
 
 # Fallback redirects for failed builds
 [[redirects]]
