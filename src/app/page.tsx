@@ -1,13 +1,19 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect } from 'react'
 
 export default function Page() {
-  // Check if we're in development or if critical env vars are missing
-  const isProduction = process.env.NODE_ENV === 'production'
-  
-  // For client-side debugging
-  if (typeof window !== 'undefined' && !isProduction) {
-    console.log('GitFreeDocify Debug: Page loading successfully')
-  }
+  useEffect(() => {
+    console.log('GitFreeDocify: Main page loaded successfully')
+    
+    // Debug info
+    if (typeof window !== 'undefined') {
+      console.log('Window location:', window.location.href)
+      console.log('User agent:', navigator.userAgent)
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
       {/* 3D Background Elements */}

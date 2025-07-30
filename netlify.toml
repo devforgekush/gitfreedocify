@@ -13,28 +13,23 @@
 [functions]
   node_bundler = "esbuild"
 
-# Fallback redirects for failed builds
+# Simple redirect for root
 [[redirects]]
   from = "/"
-  to = "/fallback.html"
+  to = "/index.html"
   status = 200
-  conditions = {Role = ["app-failure"]}
 
-# Default SPA fallback
+# API routes
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Catch all for Next.js
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = {Role = ["app"]}
-
-# Headers for security
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
 
 # Headers for security
 [[headers]]
