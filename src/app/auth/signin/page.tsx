@@ -13,7 +13,7 @@ export default function SignInPage() {
     setMessage('')
     
     try {
-      // Direct GitHub OAuth redirect
+      // Direct GitHub OAuth redirect via simple server callback
       const clientId = 'Ov23lic3yzTiKmTqGpQp' // Your GitHub client ID
       const redirectUri = encodeURIComponent('https://gitfreedocify.netlify.app/api/auth/callback/github')
       const scope = encodeURIComponent('read:user user:email public_repo')
@@ -29,24 +29,24 @@ export default function SignInPage() {
     }
   }
 
-  const handleTestNextAuth = async () => {
+  const handleTestAPI = async () => {
     setIsLoading(true)
     setMessage('')
     
     try {
-      const response = await fetch('/api/auth/signin', {
+      const response = await fetch('/api/test', {
         method: 'GET',
       })
       
       if (response.ok) {
         const data = await response.json()
-        setMessage(`✅ NextAuth API working: ${JSON.stringify(data)}`)
+        setMessage(`✅ API working: ${data.message}`)
       } else {
-        setMessage(`❌ NextAuth API failed: ${response.status} ${response.statusText}`)
+        setMessage(`❌ API failed: ${response.status} ${response.statusText}`)
       }
     } catch (error) {
       setMessage(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
-      console.error('NextAuth test error:', error)
+      console.error('API test error:', error)
     } finally {
       setIsLoading(false)
     }
@@ -102,11 +102,11 @@ export default function SignInPage() {
             </button>
 
             <button
-              onClick={handleTestNextAuth}
+              onClick={handleTestAPI}
               disabled={isLoading}
               className="w-full bg-gradient-to-r from-blue-800 to-blue-900 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transform hover:scale-105 hover:shadow-2xl border border-white/10"
             >
-              <span className="font-semibold">Test NextAuth API</span>
+              <span className="font-semibold">Test API</span>
             </button>
           </div>
 
