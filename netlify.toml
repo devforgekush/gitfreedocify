@@ -1,10 +1,10 @@
 [build]
-  command = "npx prisma generate && npm run build"
+  command = "npm run build:netlify"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
-  PRISMA_CLI_BINARY_TARGETS = "native,debian-openssl-3.0.x,linux-musl"
+  PRISMA_CLI_BINARY_TARGETS = "native,debian-openssl-3.0.x,linux-musl,linux-musl-openssl-3.0.x"
   PRISMA_SKIP_POSTINSTALL_GENERATE = "true"
 
 # Enable Next.js on Netlify
