@@ -9,12 +9,17 @@ import { useRouter } from 'next/navigation'
 export default function SignInPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const checkSession = async () => {
-      const session = await getSession()
-      if (session) {
-        router.push('/dashboard')
+      try {
+        const session = await getSession()
+        if (session) {
+          router.push('/dashboard')
+        }
+      } catch (err) {
+        console.error('Session check error:', err)
       }
     }
     checkSession()
@@ -22,10 +27,23 @@ export default function SignInPage() {
 
   const handleGitHubSignIn = async () => {
     setIsLoading(true)
+    setError('')
+    
     try {
-      await signIn('github', { callbackUrl: '/dashboard' })
+      const result = await signIn('github', { 
+        callbackUrl: '/dashboard',
+        redirect: false 
+      })
+      
+      if (result?.error) {
+        setError('Failed to sign in. Please try again.')
+        console.error('Sign in error:', result.error)
+      } else if (result?.url) {
+        window.location.href = result.url
+      }
     } catch (error) {
       console.error('Sign in error:', error)
+      setError('An unexpected error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -57,6 +75,12 @@ export default function SignInPage() {
             </h1>
             <p className="text-gray-200 text-lg font-medium">Sign in to start generating professional documentation</p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <p className="text-red-300 text-sm text-center">{error}</p>
+            </div>
+          )}
 
           <button
             onClick={handleGitHubSignIn}
