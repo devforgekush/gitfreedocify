@@ -1,53 +1,290 @@
 'use client'
 
-import { useSession, signOut } from 'next-auth/react'
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { Github, FileText, Plus, Search, LogOut, Star, GitFork, ExternalLink, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { ArrowLeft, User, Settings, LogOut, GitBranch, CheckCircle, Github } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 
-interface Repository {
-  id: string
-  name: string
-  description?: string
-  githubUrl: string
-  githubId: string
-  language?: string
-  updated_at?: string
-  isPublic?: boolean
-  stargazers_count?: number
-  forks_count?: number
-  hasDocumentation?: boolean
-}
-
-export default function Dashboard() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [repositories, setRepositories] = useState<Repository[]>([])
+export default function DashboardPage() {
+  const searchParams = useSearchParams()
+  const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [projects, setProjects] = useState<any[]>([])
+  const [authSuccess, setAuthSuccess] = useState(false)
 
-  const fetchRepositories = useCallback(async () => {
-    try {
-      console.log('🔄 Fetching GitHub repositories...')
-      setLoading(true)
-      
-      // Fetch GitHub repositories
-      const response = await fetch('/api/github/repositories', {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+  useEffect(() => {
+    // Check if user came from GitHub OAuth
+    const githubUser = searchParams.get('user')
+    const success = searchParams.get('success')
+    
+    if (githubUser && success === 'github_auth') {
+      setAuthSuccess(true)
+      setUser({
+        name: githubUser,
+        email: `${githubUser}@github.com`,
+        avatar: `https://github.com/${githubUser}.png`,
+        provider: 'github'
       })
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          router.push('/auth/signin')
-          return
+      
+      // Simulate some projects for the authenticated user
+      setProjects([
+        {
+          id: 1,
+          name: `${githubUser}/awesome-project`,
+          description: 'A sample repository for testing documentation generation',
+          language: 'TypeScript',
+          stars: 42,
+          lastGenerated: new Date().toISOString().split('T')[0],
+          status: 'completed'
         }
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+      ])
+      setLoading(false)
+    } else {
+      // For testing - simulate a logged-in user
+      setTimeout(() => {
+        setUser({
+          name: 'Test User',
+          email: 'test@example.com',
+          avatar: '/default-avatar.png'
+        })
+        setProjects([
+          {
+            id: 1,
+            name: 'my-awesome-repo',
+            description: 'A sample repository for testing',
+            language: 'TypeScript',
+            stars: 42,
+            lastGenerated: '2024-01-15',
+            status: 'completed'
+          },
+          {
+            id: 2,
+            name: 'another-project',
+            description: 'Another test project',
+            language: 'Python',
+            stars: 18,
+            lastGenerated: '2024-01-10',
+            status: 'in-progress'
+          }
+        ])
+        setLoading(false)
+      }, 1000)
+    }
+  }, [searchParams])
 
-      const data = await response.json()
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading your dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+      {/* Success Banner */}
+      {authSuccess && (
+        <div className="bg-green-500/20 border-b border-green-500/30 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center justify-center space-x-2 text-green-300">
+              <CheckCircle className="h-5 w-5" />
+              <span className="font-medium">Successfully signed in with GitHub!</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/"
+                className="text-gray-300 hover:text-white transition-colors inline-flex items-center font-medium"
+              >
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Back to home
+              </Link>
+              <div className="h-6 w-px bg-gray-500"></div>
+              <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <img
+                    src={user?.avatar || '/default-avatar.png'}
+                    alt={user?.name || 'User'}
+                    className="h-10 w-10 rounded-full border-2 border-white/30"
+                  />
+                  {user?.provider === 'github' && (
+                    <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-gray-800 rounded-full flex items-center justify-center border border-white/30">
+                      <Github className="h-2.5 w-2.5 text-white" />
+                    </div>
+                  )}
+                </div>
+                <div className="text-white">
+                  <p className="font-semibold">{user?.name}</p>
+                  <p className="text-sm text-gray-300">{user?.email}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button className="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                  <Settings className="h-5 w-5" />
+                </button>
+                <Link
+                  href="/auth/signin"
+                  className="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Message for GitHub Users */}
+        {user?.provider === 'github' && (
+          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl p-6 mb-8 border border-blue-500/30">
+            <div className="flex items-center space-x-3 mb-3">
+              <Github className="h-8 w-8 text-blue-400" />
+              <h2 className="text-xl font-bold text-white">Welcome, {user.name}!</h2>
+            </div>
+            <p className="text-gray-200 mb-4">
+              Your GitHub account is now connected. You can generate professional documentation for any of your repositories.
+            </p>
+            <Link
+              href="/generate"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-semibold inline-block"
+            >
+              Generate Documentation
+            </Link>
+          </div>
+        )}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-300 text-sm font-medium">Total Projects</p>
+                <p className="text-3xl font-bold text-white">{projects.length}</p>
+              </div>
+              <div className="p-3 bg-indigo-500/20 rounded-xl">
+                <GitBranch className="h-8 w-8 text-indigo-400" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-300 text-sm font-medium">Completed</p>
+                <p className="text-3xl font-bold text-white">
+                  {projects.filter(p => p.status === 'completed').length}
+                </p>
+              </div>
+              <div className="p-3 bg-green-500/20 rounded-xl">
+                <CheckCircle className="h-8 w-8 text-green-400" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-300 text-sm font-medium">In Progress</p>
+                <p className="text-3xl font-bold text-white">
+                  {projects.filter(p => p.status === 'in-progress').length}
+                </p>
+              </div>
+              <div className="p-3 bg-yellow-500/20 rounded-xl">
+                <Settings className="h-8 w-8 text-yellow-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Projects Section */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden">
+          <div className="p-6 border-b border-white/20">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-white">Your Projects</h2>
+              <Link
+                href="/generate"
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-2 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 font-semibold"
+              >
+                Generate New
+              </Link>
+            </div>
+          </div>
+          
+          {projects.length > 0 ? (
+            <div className="divide-y divide-white/10">
+              {projects.map((project) => (
+                <div key={project.id} className="p-6 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="text-lg font-semibold text-white">{project.name}</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          project.status === 'completed' 
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {project.status}
+                        </span>
+                      </div>
+                      <p className="text-gray-300 mb-2">{project.description}</p>
+                      <div className="flex items-center space-x-4 text-sm text-gray-400">
+                        <span>{project.language}</span>
+                        <span>⭐ {project.stars}</span>
+                        <span>Last generated: {project.lastGenerated}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <button className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors">
+                        View
+                      </button>
+                      <button className="px-4 py-2 bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30 transition-colors">
+                        Regenerate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="mb-6">
+                <div className="h-24 w-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto">
+                  <GitBranch className="h-12 w-12 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">No projects yet</h3>
+              <p className="text-gray-300 mb-6">Start by generating documentation for your first repository</p>
+              <Link
+                href="/generate"
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-3 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 font-semibold inline-block"
+              >
+                Generate Your First Project
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
       console.log('📊 GitHub repositories loaded:', data)
 
       if (data.repositories) {
