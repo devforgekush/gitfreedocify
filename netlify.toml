@@ -1,9 +1,10 @@
 [build]
-  command = "npm run build"
+  command = "npx prisma generate && npm run build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"
+  PRISMA_CLI_BINARY_TARGETS = "native,debian-openssl-3.0.x"
 
 # Enable Next.js on Netlify
 [[plugins]]
@@ -11,6 +12,7 @@
 
 [functions]
   node_bundler = "esbuild"
+  included_files = ["node_modules/.prisma/client/libquery_engine-*"]
 
 # API Routes configuration
 [[redirects]]
@@ -32,11 +34,3 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-
-# Environment variables that need to be set in Netlify UI:
-# NEXTAUTH_URL - Your Netlify site URL
-# NEXTAUTH_SECRET - Random string for session encryption
-# GITHUB_CLIENT_ID - Your GitHub OAuth App ID
-# GITHUB_CLIENT_SECRET - Your GitHub OAuth App Secret
-# GEMINI_API_KEY - Your Google Gemini API key
-# DATABASE_URL - Your database connection string

@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Remove standalone output for Netlify
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client']
-  },
+  // Remove experimental serverComponentsExternalPackages for Netlify
   
   // Image optimization settings
   images: {
